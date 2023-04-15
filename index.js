@@ -57,7 +57,7 @@ function getProverbById(id) {
 
 
 
-function handleStartCommand(msg) {
+async function handleStartCommand(msg) {
     const welcomeMessage = `Welcome to the Yoruba Proverb Bot! 
 
 I can share with you some of the most popular proverbs from the Yoruba culture.
@@ -65,12 +65,16 @@ Just type /random to receive a random one.
 Or type /help to see a list of all available commands.
 Enyoy!`;
 
-    bot.sendMessage(msg.chat.id, welcomeMessage);
-    console.log('Sent a welcome message to ' + msg.from.first_name + ' ' + msg.from.last_name + '.');
+    try {
+        await bot.sendMessage(msg.chat.id, welcomeMessage);
+        console.log('Sent a welcome message to ' + msg.from.first_name + ' ' + msg.from.last_name + '.');
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 
-function handleRandomCommand(msg) {
+async function handleRandomCommand(msg) {
     let count = 1;
     const args = msg.text.split(' ').slice(1);
     if (args.length > 0) {
@@ -88,78 +92,79 @@ function handleRandomCommand(msg) {
         randomProverbs.push(allProverbs[Math.floor(Math.random() * allProverbs.length)]);
     }
     const randomProverbsMessage = randomProverbs.map((proverb) => formatProverb(proverb)).join('\n\n');
-    bot.sendMessage(msg.chat.id, randomProverbsMessage);
+    await bot.sendMessage(msg.chat.id, randomProverbsMessage);
     console.log('Sent ' + count + ' random proverbs to ' + msg.from.first_name + ' ' + msg.from.last_name + '.');
 }
 
 
-
-function handleSearchCommand(msg) {
-    const args = msg.text.split(' ').slice(1);
-    if (args.length === 0) {
-        bot.sendMessage(msg.chat.id, 'Invalid command. Please try again.');
-        return;
-    }
-    let count = 1;
-    let query = args.join(' ');
-    if (args.length > 1) {
-        count = parseInt(args[args.length - 1]);
-        if (isNaN(count)) {
-            bot.sendMessage(msg.chat.id, 'Invalid argument: ' + args[args.length - 1]);
-            return;
-        } else if (count > 5) {
-            bot.sendMessage(msg.chat.id, 'Max limit is 5');
+async function handleSearchCommand(msg) {
+    try {
+        const args = msg.text.split(' ').slice(1);
+        if (args.length === 0) {
+            await bot.sendMessage(msg.chat.id, 'Invalid command. Please try again.');
             return;
         }
-        query = args.slice(0, args.length - 1).join(' ');
+        let count = 1;
+        let query = args.join(' ');
+        if (args.length > 1) {
+            count = parseInt(args[args.length - 1]);
+            if (isNaN(count)) {
+                await bot.sendMessage(msg.chat.id, 'Invalid argument: ' + args[args.length - 1]);
+                return;
+            } else if (count > 5) {
+                await bot.sendMessage(msg.chat.id, 'Max limit is 5');
+                return;
+            }
+            query = args.slice(0, args.length - 1).join(' ');
+        }
+        const searchResults = allProverbs.filter((proverb) => proverb.translation.toLowerCase().includes(query.toLowerCase()));
+        if (searchResults.length === 0) {
+            await bot.sendMessage(msg.chat.id, 'No proverbs found for query: ' + query);
+            return;
+        }
+        const randomSearchResults = [];
+        for (let i = 0; i < count; i++) {
+            randomSearchResults.push(searchResults[Math.floor(Math.random() * searchResults.length)]);
+        }
+        const randomSearchResultsMessage = randomSearchResults.map((proverb) => formatProverb(proverb)).join('\n\n');
+        await bot.sendMessage(msg.chat.id, randomSearchResultsMessage);
+        console.log('Sent ' + count + ' random proverbs matching query ' + query + ' to ' + msg.from.first_name + ' ' + msg.from.last_name + '.');
+    } catch (error) {
+        console.error('Error in handleSearchCommand:', error);
+        await bot.sendMessage(msg.chat.id, 'Sorry, there was an error processing your command. Please try again later.');
     }
-    const searchResults = allProverbs.filter((proverb) => proverb.translation.toLowerCase().includes(query.toLowerCase()));
-    if (searchResults.length === 0) {
-        bot.sendMessage(msg.chat.id, 'No proverbs found for query: ' + query);
-        return;
-
-    }
-    const randomSearchResults = [];
-    for (let i = 0; i < count; i++) {
-        randomSearchResults.push(searchResults[Math.floor(Math.random() * searchResults.length)]);
-    }
-    const randomSearchResultsMessage = randomSearchResults.map((proverb) => formatProverb(proverb)).join('\n\n');
-    bot.sendMessage(msg.chat.id, randomSearchResultsMessage);
-
-    console.log('Sent ' + count + ' random proverbs matching query ' + query + ' to ' + msg.from.first_name + ' ' + msg.from.last_name + '.');
 }
 
 
 
-function handleIdCommand(msg) {
+async function handleIdCommand(msg) {
     const id = msg.text.split(' ').slice(1).join(' ');
     const proverb = getProverbById(id);
     if (proverb) {
-        bot.sendMessage(msg.chat.id, proverb);
+        await bot.sendMessage(msg.chat.id, proverb);
         console.log('Sent proverb with id ' + id + ' to ' + msg.from.first_name + ' ' + msg.from.last_name + '.');
     } else {
-        bot.sendMessage(msg.chat.id, 'Proverb with id ' + id + ' not found.');
+        await bot.sendMessage(msg.chat.id, 'Proverb with id ' + id + ' not found.');
         console.log('Failed to send proverb with id ' + id + ' to ' + msg.from.first_name + ' ' + msg.from.last_name + '.');
     }
 }
 
-
-function handleUnknownCommand(msg) {
+async function handleUnknownCommand(msg) {
     const unknownCommandMsg = 'Unknown command. Please try again. \nTo see a list of available commands, type /help.';
-    bot.sendMessage(msg.chat.id, unknownCommandMsg);
+    await bot.sendMessage(msg.chat.id, unknownCommandMsg);
     console.log(`Sent an error message to ${msg.from.first_name} ${msg.from.last_name}: "${unknownCommandMsg}"`);
 }
 
 
 
-function handleHelpCommand(msg) {
+async function handleHelpCommand(msg) {
     const args = msg.text.split(' ').slice(1);
     if (args.length === 0) {
         let helpMessage = "";
         for (let command in commands) {
             helpMessage += `${command} - ${commands[command].description}\n`;
         }
-        bot.sendMessage(msg.chat.id, helpMessage);
+        await bot.sendMessage(msg.chat.id, helpMessage);
         console.log('Sent a list of all commands to ' + msg.from.first_name + ' ' + msg.from.last_name + '.');
     } else {
         const command = args[0];
@@ -170,36 +175,36 @@ function handleHelpCommand(msg) {
                     helpMessage += `${option.usage} - ${option.description}\n`;
                 }
             }
-            bot.sendMessage(msg.chat.id, helpMessage);
+            await bot.sendMessage(msg.chat.id, helpMessage);
             console.log('Sent help for command ' + command + ' to ' + msg.from.first_name + ' ' + msg.from.last_name + '.');
         } else {
-            bot.sendMessage(msg.chat.id, 'Unknown command. Please try again.');
+            await bot.sendMessage(msg.chat.id, 'Unknown command. Please try again.');
         }
     }
 }
 
 
 console.log('Bot initialized successfully.');
-bot.on('message', (msg) => {
+bot.on('message', async (msg) => {
     const command = msg.text.split(' ')[0];
     switch (command) {
         case '/start':
-            handleStartCommand(msg);
+           await handleStartCommand(msg);
             break;
         case '/help':
-            handleHelpCommand(msg);
+            await handleHelpCommand(msg);
             break;
         case '/random':
-            handleRandomCommand(msg);
+            await handleRandomCommand(msg);
             break;
         case '/search':
-            handleSearchCommand(msg);
+            await  handleSearchCommand(msg);
             break;
         case '/id':
-            handleIdCommand(msg);
+            await  handleIdCommand(msg);
             break;
         default:
-            handleUnknownCommand(msg);
+            await  handleUnknownCommand(msg);
     }
 
 });

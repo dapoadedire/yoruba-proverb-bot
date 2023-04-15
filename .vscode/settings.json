@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "undefined/subscriptions/e1a5a617-e32a-4bfc-ae54-b23a5fdf776f/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/eeess-oau-bot",
+    "appService.deploySubpath": "."
+}

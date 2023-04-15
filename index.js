@@ -193,28 +193,32 @@ async function handleHelpCommand(msg) {
 
 console.log('Bot initialized successfully.');
 bot.on('message', async (msg) => {
-    const command = msg.text.split(' ')[0];
-    switch (command) {
-        case '/start':
-           await handleStartCommand(msg);
-            break;
-        case '/help':
-            await handleHelpCommand(msg);
-            break;
-        case '/random':
-            await handleRandomCommand(msg);
-            break;
-        case '/search':
-            await  handleSearchCommand(msg);
-            break;
-        case '/id':
-            await  handleIdCommand(msg);
-            break;
-        default:
-            await  handleUnknownCommand(msg);
+    if (msg.video) {
+        bot.sendMessage(msg.chat.id, 'Sorry, I can only process text messages.');
+    } else {
+        const command = msg.text.split(' ')[0];
+        switch (command) {
+            case '/start':
+                await handleStartCommand(msg);
+                break;
+            case '/help':
+                await handleHelpCommand(msg);
+                break;
+            case '/random':
+                await handleRandomCommand(msg);
+                break;
+            case '/search':
+                await handleSearchCommand(msg);
+                break;
+            case '/id':
+                await handleIdCommand(msg);
+                break;
+            default:
+                await handleUnknownCommand(msg);
+        }
     }
-
 });
+
 console.log('Bot is listening for commands...');
 
 

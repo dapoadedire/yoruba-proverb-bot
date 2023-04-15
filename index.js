@@ -102,6 +102,7 @@ async function handleSearchCommand(msg) {
         const args = msg.text.split(' ').slice(1);
         if (args.length === 0) {
             await bot.sendMessage(msg.chat.id, 'Invalid command. Please try again.');
+            console.log(`Sent an error message to ${msg.from.first_name} ${msg.from.last_name}`);
             return;
         }
         let count = 1;
@@ -110,9 +111,13 @@ async function handleSearchCommand(msg) {
             count = parseInt(args[args.length - 1]);
             if (isNaN(count)) {
                 await bot.sendMessage(msg.chat.id, 'Invalid argument: ' + args[args.length - 1]);
+                console.log(`Sent an error message to ${msg.from.first_name} ${msg.from.last_name}`);
+
                 return;
             } else if (count > 5) {
                 await bot.sendMessage(msg.chat.id, 'Max limit is 5');
+                console.log(`Sent an error message to ${msg.from.first_name} ${msg.from.last_name}`);
+
                 return;
             }
             query = args.slice(0, args.length - 1).join(' ');
@@ -120,6 +125,8 @@ async function handleSearchCommand(msg) {
         const searchResults = allProverbs.filter((proverb) => proverb.translation.toLowerCase().includes(query.toLowerCase()));
         if (searchResults.length === 0) {
             await bot.sendMessage(msg.chat.id, 'No proverbs found for query: ' + query);
+            console.log(`Sent an error message to ${msg.from.first_name} ${msg.from.last_name}`);
+
             return;
         }
         const randomSearchResults = [];
@@ -152,7 +159,7 @@ async function handleIdCommand(msg) {
 async function handleUnknownCommand(msg) {
     const unknownCommandMsg = 'Unknown command. Please try again. \nTo see a list of available commands, type /help.';
     await bot.sendMessage(msg.chat.id, unknownCommandMsg);
-    console.log(`Sent an error message to ${msg.from.first_name} ${msg.from.last_name}: "${unknownCommandMsg}"`);
+    console.log(`Sent an error message to ${msg.from.first_name} ${msg.from.last_name}`);
 }
 
 

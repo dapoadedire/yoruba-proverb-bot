@@ -193,7 +193,7 @@ async function handleHelpCommand(msg) {
 
 console.log('Bot initialized successfully.');
 bot.on('message', async (msg) => {
-    if (msg.video) {
+    if (!msg.text) {
         bot.sendMessage(msg.chat.id, 'Sorry, I can only process text messages.');
     } else {
         const command = msg.text.split(' ')[0];

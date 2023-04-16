@@ -167,12 +167,18 @@ async function handleUnknownCommand(msg) {
 async function handleHelpCommand(msg) {
     const args = msg.text.split(' ').slice(1);
     if (args.length === 0) {
-        let helpMessage = "";
+        let helpMessage = "\n";
         for (let command in commands) {
             helpMessage += `${command} - ${commands[command].description}\n`;
+            if (commands[command].options) {
+                for (let option of commands[command].options) {
+                    helpMessage += `${option.usage} - ${option.description}\n`;
+                }
+                helpMessage += "\n";
+            }
         }
         await bot.sendMessage(msg.chat.id, helpMessage);
-        console.log('Sent a list of all commands to ' + msg.from.first_name + ' ' + msg.from.last_name + '.');
+        console.log('Sent a list of all commands and options to ' + msg.from.first_name + ' ' + msg.from.last_name + '.');
     } else {
         const command = args[0];
         if (commands[command]) {
